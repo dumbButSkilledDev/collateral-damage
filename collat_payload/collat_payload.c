@@ -519,6 +519,7 @@ int main(int argc, char** argv)
 	    printf("ioring setup failed!\n");
         sprintf_s(ptr_msg, sizeof(ptr_msg), "IO Ring setup failed. Result: %i\nReboot your console and try again.\n", res);
         send(winSock, ptr_msg, strlen(ptr_msg), 0);
+	    printf("---> FAIL DETAIL: %s", ptr_msg);
 	    printf("would you like to crash the console, to reboot faster. Y/N\n");
 	    if (getchar() == 'Y' || getchar() == 'y') {
 		    printf("continuing, so console crashes....\n");
