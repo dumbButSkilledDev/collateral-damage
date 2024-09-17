@@ -423,7 +423,7 @@ int main(int argc, char** argv)
     winSock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
     sockAddr.sin_family = AF_INET;
     sockAddr.sin_port = htons(port);
-    sockAddr.sin_addr.s_addr = inet_addr(GLOBAL_INFO->ip_addr);
+    sockAddr.sin_addr.s_addr = inet_addr("192.168.229.1");
     WSAConnect(winSock, (SOCKADDR*)&sockAddr, sizeof(sockAddr), NULL, NULL, NULL, NULL);
 
     // Write our banner message
